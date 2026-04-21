@@ -10,9 +10,22 @@
 		B2CB40E92F96EA28001DB3C3 /* totem-encryption.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "totem-encryption.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B2CB40EC2F96EA28001DB3C3 = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Info.plist",
+			);
+			target = B2CB40E82F96EA28001DB3C3 /* totem-encryption */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B2CB40EB2F96EA28001DB3C3 /* totem-encryption */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B2CB40EC2F96EA28001DB3C3,
+			);
 			path = "totem-encryption";
 			sourceTree = "<group>";
 		};

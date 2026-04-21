@@ -5,6 +5,7 @@
 //  Created by Charles Love on 4/20/26.
 //
 
+import Combine
 import SwiftUI
 
 /// Shared object that carries an incoming totem:// challenge URL

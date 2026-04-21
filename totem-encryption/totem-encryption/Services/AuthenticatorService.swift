@@ -73,7 +73,7 @@ final class AuthenticatorService: ObservableObject {
             statusMessage = "Challenge expired."
             return
         }
-        guard let cloud, let magnetic else {
+        guard let cloud else {
             statusMessage = AuthenticatorError.noPhysicalData.localizedDescription ?? ""
             update(challengeID: challengeID, status: .denied)
             return
