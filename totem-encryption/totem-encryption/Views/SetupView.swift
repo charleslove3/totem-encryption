@@ -4,12 +4,11 @@
 //
 //  Created by Charles Love on 4/20/26.
 //
-//  Guided 4-step onboarding that takes you from zero to a live QR you can scan:
+//  Guided 3-step onboarding that takes you from zero to a live QR you can scan:
 //
 //  Step 1 — Scan your objects (LiDAR) to build your physical signature.
-//  Step 2 — Save magnetic anchor (where you are now is part of the key).
-//  Step 3 — Enter a secret message and enroll (encrypt + save helper string).
-//  Step 4 — Get a QR code. Scan it with iOS camera → opens app → scan objects → access granted.
+//  Step 2 — Enter a secret message and enroll (encrypt + save helper string).
+//  Step 3 — Get a QR code. Scan it with iOS camera → opens app → scan objects → access granted.
 
 import SwiftUI
 
@@ -17,7 +16,6 @@ import SwiftUI
 struct SetupView: View {
 
     @StateObject private var lidar    = LiDARService()
-    @StateObject private var magnetic = MagneticService()
 
     private let vault = VaultService()
 
@@ -33,16 +31,14 @@ struct SetupView: View {
 
     enum SetupStep: Int, CaseIterable {
         case scanObject = 1
-        case anchor     = 2
-        case enroll     = 3
-        case qrCode     = 4
+        case enroll     = 2
+        case qrCode     = 3
 
         var title: String {
             switch self {
-            case .scanObject: return "Step 1 of 4 — Scan Your Totem"
-            case .anchor:     return "Step 2 of 4 — Save Location Anchor"
-            case .enroll:     return "Step 3 of 4 — Protect a Secret"
-            case .qrCode:     return "Step 4 of 4 — Your Access QR Code"
+            case .scanObject: return "Step 1 of 3 — Scan Your Totem"
+            case .enroll:     return "Step 2 of 3 — Protect a Secret"
+            case .qrCode:     return "Step 3 of 3 — Your Access QR Code"
             }
         }
     }
@@ -59,7 +55,7 @@ struct SetupView: View {
                             Rectangle().fill(Color.gray.opacity(0.3))
                             Rectangle()
                                 .fill(Color.cyan)
-                                .frame(width: geo.size.width * CGFloat(step.rawValue) / 4)
+                                .frame(width: geo.size.width * CGFloat(step.rawValue) / 3)
                                 .animation(.spring(), value: step)
                         }
                         .frame(height: 3)
@@ -75,7 +71,6 @@ struct SetupView: View {
 
                             switch step {
                             case .scanObject: scanObjectStep
-                            case .anchor:     anchorStep
                             case .enroll:     enrollStep
                             case .qrCode:     qrCodeStep
                             }
@@ -96,12 +91,9 @@ struct SetupView: View {
             } message: { Text(errorMessage) }
             .onAppear {
                 lidar.start()
-                magnetic.start()
-                magnetic.loadBaseline()
             }
             .onDisappear {
                 lidar.stop()
-                magnetic.stop()
             }
         }
     }
@@ -148,54 +140,13 @@ struct SetupView: View {
             }
 
             nextButton(label: "Object scanned — Next →") {
-                step = .anchor
+                step = .enroll
             }
             .disabled(lidar.capturedCloud == nil)
         }
     }
 
-    // MARK: - Step 2: Magnetic Anchor
-
-    private var anchorStep: some View {
-        VStack(spacing: 20) {
-            instructionCard(
-                icon: "location.north.line.fill",
-                text: "Stay in the room where you want this key to work. Tap 'Save Anchor' to record the magnetic fingerprint of this location."
-            )
-
-            if let sig = magnetic.currentSignature {
-                VStack(spacing: 6) {
-                    Text("Live readings")
-                        .font(.caption).foregroundStyle(.secondary)
-                    HStack(spacing: 20) {
-                        axisLabel("X", value: sig.x)
-                        axisLabel("Y", value: sig.y)
-                        axisLabel("Z", value: sig.z)
-                    }
-                    .padding()
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                }
-            }
-
-            if magnetic.baseline != nil {
-                Label("Anchor saved ✓", systemImage: "checkmark.seal.fill")
-                    .foregroundStyle(.green).font(.callout)
-            }
-
-            Button { magnetic.saveBaseline() } label: {
-                Label("Save Anchor", systemImage: "pin.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent).tint(.indigo)
-
-            nextButton(label: "Anchor saved — Next →") {
-                step = .enroll
-            }
-            .disabled(magnetic.baseline == nil)
-        }
-    }
-
-    // MARK: - Step 3: Enroll (encrypt secret)
+    // MARK: - Step 2: Enroll (encrypt secret)
 
     private var enrollStep: some View {
         VStack(spacing: 20) {
@@ -238,7 +189,7 @@ struct SetupView: View {
         }
     }
 
-    // MARK: - Step 4: QR Code
+    // MARK: - Step 3: QR Code
 
     private var qrCodeStep: some View {
         VStack(spacing: 20) {
@@ -287,18 +238,16 @@ struct SetupView: View {
     // MARK: - Helpers
 
     private func enrollAndEncrypt() async {
-        guard let cloud = lidar.capturedCloud,
-              let mag   = magnetic.currentSignature else {
-            showErr("Scan an object and save an anchor first.")
+        guard let cloud = lidar.capturedCloud else {
+            showErr("Scan an object first.")
             return
         }
         isWorking = true
         do {
-            let seed = FuzzyExtractor.buildSeed(cloud: cloud, magnetic: mag)
+            let seed = FuzzyExtractor.buildSeed(cloud: cloud)
             let (key, helperString) = try FuzzyExtractor.enroll(seedData: seed)
             try await vault.storeHelperString(helperString)
             ciphertext = try vault.encrypt(plaintext: Data(secret.utf8), key: key)
-            // Persist ciphertext for later retrieval
             UserDefaults.standard.set(ciphertext, forKey: "totem_ciphertext")
         } catch {
             showErr(error.localizedDescription)
@@ -335,15 +284,6 @@ struct SetupView: View {
         }
         .padding()
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 14))
-    }
-
-    private func axisLabel(_ axis: String, value: Double) -> some View {
-        VStack(spacing: 2) {
-            Text(axis).font(.caption2).foregroundStyle(.secondary)
-            Text(String(format: "%.1f", value))
-                .font(.system(.caption, design: .monospaced))
-                .foregroundStyle(.primary)
-        }
     }
 
     private func nextButton(label: String, action: @escaping () -> Void) -> some View {

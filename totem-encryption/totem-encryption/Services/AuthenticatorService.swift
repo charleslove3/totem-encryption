@@ -65,7 +65,7 @@ final class AuthenticatorService: ObservableObject {
     func approve(
         challengeID: UUID,
         cloud: PointCloud?,
-        magnetic: MagneticSignature?
+        magnetic: MagneticSignature? = nil
     ) async {
         guard var session = session(id: challengeID) else { return }
         guard !session.isExpired else {
@@ -84,8 +84,8 @@ final class AuthenticatorService: ObservableObject {
             // 1. Load helper string from Vault (biometric-gated).
             let helperString = try await vault.loadHelperString()
 
-            // 2. Build noisy seed from captured physical data.
-            let seed = FuzzyExtractor.buildSeed(cloud: cloud, magnetic: magnetic)
+            // 2. Build seed from LiDAR only (magnetic anchor disabled for now).
+            let seed = FuzzyExtractor.buildSeed(cloud: cloud)
 
             // 3. Reconstruct deterministic key.
             let key = try FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helperString)

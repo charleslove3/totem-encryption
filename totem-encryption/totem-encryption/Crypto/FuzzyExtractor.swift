@@ -106,8 +106,9 @@ struct FuzzyExtractor {
 // MARK: - Convenience: build seed from cloud + magnetic
 
 extension FuzzyExtractor {
-    /// Build the combined seed from a PointCloud and a MagneticSignature.
-    static func buildSeed(cloud: PointCloud, magnetic: MagneticSignature) -> Data {
-        cloud.radialDistancesBytes() + magnetic.bytes()
+    /// Build the combined seed from a PointCloud. Magnetic is optional (disabled for now).
+    static func buildSeed(cloud: PointCloud, magnetic: MagneticSignature? = nil) -> Data {
+        cloud.radialDistancesBytes()
+        // magnetic intentionally excluded until anchor feature is re-enabled
     }
 }
