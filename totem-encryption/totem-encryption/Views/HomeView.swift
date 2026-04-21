@@ -8,32 +8,39 @@
 import SwiftUI
 
 struct HomeView: View {
+    @EnvironmentObject private var router: AppRouter
+    @State private var selectedTab = 0
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             TotemView()
-                .tabItem {
-                    Label("Totem", systemImage: "cube.transparent")
-                }
+                .tabItem { Label("Totem", systemImage: "cube.transparent") }
+                .tag(0)
 
             AnchorView()
-                .tabItem {
-                    Label("Anchor", systemImage: "location.north.line")
-                }
+                .tabItem { Label("Anchor", systemImage: "location.north.line") }
+                .tag(1)
 
             VaultView()
-                .tabItem {
-                    Label("Vault", systemImage: "lock.shield")
-                }
+                .tabItem { Label("Vault", systemImage: "lock.shield") }
+                .tag(2)
 
-            AuthenticatorView()
-                .tabItem {
-                    Label("Authenticator", systemImage: "person.badge.key")
-                }
+            AuthenticatorView(incomingChallenge: $router.incomingChallenge)
+                .tabItem { Label("Authenticator", systemImage: "person.badge.key") }
+                .tag(3)
+
+            SetupView()
+                .tabItem { Label("Setup", systemImage: "wand.and.stars") }
+                .tag(4)
         }
         .tint(.cyan)
+        .onChange(of: router.incomingChallenge) { _, challenge in
+            if challenge != nil { selectedTab = 3 }
+        }
     }
 }
 
 #Preview {
     HomeView()
+        .environmentObject(AppRouter.shared)
 }
