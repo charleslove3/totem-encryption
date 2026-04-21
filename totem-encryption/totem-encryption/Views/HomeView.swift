@@ -24,6 +24,11 @@ struct HomeView: View {
                 .tabItem {
                     Label("Vault", systemImage: "lock.shield")
                 }
+
+            AuthenticatorView()
+                .tabItem {
+                    Label("Authenticator", systemImage: "person.badge.key")
+                }
         }
         .tint(.cyan)
     }
