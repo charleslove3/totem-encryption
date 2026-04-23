@@ -58,7 +58,6 @@ final class LiDARService: NSObject, ObservableObject {
 
         for anchor in frame.anchors.compactMap({ $0 as? ARMeshAnchor }) {
             let geometry = anchor.geometry
-            let vertexBuffer = geometry.vertices
 
             for i in 0 ..< geometry.vertices.count {
                 // Extract vertex from Metal buffer
