@@ -222,39 +222,29 @@ struct SlotCard: View {
             }
 
             if isScanning {
-                // Live scan controls
-                VStack(spacing: 10) {
-                    HStack {
-                        Image(systemName: "cube.transparent")
-                            .foregroundStyle(.cyan)
-                            .symbolEffect(.pulse, isActive: lidar.isRunning)
-                        Text(lidar.statusMessage)
-                            .font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        if let cloud = lidar.capturedCloud {
-                            Text("\(cloud.vertices.count) pts")
-                                .font(.system(.caption2, design: .monospaced))
-                                .foregroundStyle(.cyan)
-                        }
-                    }
+                // Live AR viewfinder
+                ScanViewfinderCard(lidar: lidar, height: 220)
+                    .padding(.top, 4)
 
-                    HStack(spacing: 10) {
-                        Button {
-                            if lidar.isRunning { lidar.stop() } else { lidar.start() }
-                        } label: {
-                            Label(lidar.isRunning ? "Stop" : "Start",
-                                  systemImage: lidar.isRunning ? "stop.circle" : "play.circle")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered).tint(.cyan)
+                // Capture controls
 
-                        Button { lidar.capture() } label: {
-                            Label("Capture", systemImage: "camera.viewfinder")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.borderedProminent).tint(.cyan)
-                        .disabled(!lidar.isRunning)
+                // Capture controls
+                HStack(spacing: 10) {
+                    Button {
+                        if lidar.isRunning { lidar.stop() } else { lidar.start() }
+                    } label: {
+                        Label(lidar.isRunning ? "Stop" : "Start",
+                              systemImage: lidar.isRunning ? "stop.circle" : "play.circle")
+                            .frame(maxWidth: .infinity)
                     }
+                    .buttonStyle(.bordered).tint(.cyan)
+
+                    Button { lidar.capture() } label: {
+                        Label("Capture", systemImage: "camera.viewfinder")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent).tint(.cyan)
+                    .disabled(!lidar.isRunning)
                 }
                 .padding(.top, 4)
             } else {

@@ -22,7 +22,7 @@ final class LiDARService: NSObject, ObservableObject {
     @Published var statusMessage = "Ready"
 
     // MARK: - Private
-    private let session = ARSession()
+    let arSession = ARSession()   // internal: shared with ARViewfinder
     private let boundingBoxHalfSize: Float = 0.05 // 10 cm → ±5 cm radius
 
     // MARK: - Public API
@@ -35,21 +35,21 @@ final class LiDARService: NSObject, ObservableObject {
         let config = ARWorldTrackingConfiguration()
         config.sceneReconstruction = .meshWithClassification
         config.environmentTexturing = .none
-        session.delegate = self
-        session.run(config, options: [.resetTracking, .removeExistingAnchors])
+        arSession.delegate = self
+        arSession.run(config, options: [.resetTracking, .removeExistingAnchors])
         isRunning = true
         statusMessage = "Scanning…"
     }
 
     func stop() {
-        session.pause()
+        arSession.pause()
         isRunning = false
         statusMessage = "Stopped"
     }
 
     /// Snapshot the current mesh anchors, filter to the bounding box, and build a PointCloud.
     func capture() {
-        guard let frame = session.currentFrame else {
+        guard let frame = arSession.currentFrame else {
             statusMessage = "No AR frame yet."
             return
         }

@@ -124,13 +124,9 @@ struct UnlockView: View {
 
     private var scanningContent: some View {
         VStack(spacing: 16) {
-            Text(lidar.statusMessage)
-                .font(.callout).foregroundStyle(.secondary)
 
-            if let cloud = lidar.capturedCloud {
-                Text("\(cloud.vertices.count) vertices")
-                    .font(.system(.caption, design: .monospaced)).foregroundStyle(.cyan)
-            }
+            // Live viewfinder
+            ScanViewfinderCard(lidar: lidar, height: 300)
 
             HStack(spacing: 12) {
                 Button {
@@ -144,7 +140,10 @@ struct UnlockView: View {
 
                 Button {
                     lidar.capture()
-                    if lidar.capturedCloud != nil { Task { await attemptUnlock() } }
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(200))
+                        if lidar.capturedCloud != nil { await attemptUnlock() }
+                    }
                 } label: {
                     Label("Capture", systemImage: "camera.viewfinder")
                         .frame(maxWidth: .infinity)
