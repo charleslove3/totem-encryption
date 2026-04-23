@@ -24,17 +24,15 @@
     <array>
         <dict>
             <key>CFBundleURLSchemes</key>
-            <array>
-                <string>totem</string>
-            </array>
+            <array><string>totem</string></array>
             <key>CFBundleURLName</key>
             <string>com.test.totem-encryption</string>
         </dict>
     </array>
     <key>NSCameraUsageDescription</key>
-    <string>Totem uses your camera to scan QR challenge codes from websites.</string>
+    <string>Totem uses your camera to scan QR challenge codes.</string>
     <key>NSFaceIDUsageDescription</key>
-    <string>Totem uses Face ID to protect your Vault and helper strings.</string>
+    <string>Totem uses Face ID to protect your Vault.</string>
     <key>UIApplicationSceneManifest</key>
     <dict>
         <key>UIApplicationSupportsMultipleScenes</key>

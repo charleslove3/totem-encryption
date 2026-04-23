@@ -13,34 +13,25 @@ struct HomeView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            TotemView()
-                .tabItem { Label("Totem", systemImage: "cube.transparent") }
+            UnlockView()
+                .tabItem { Label("Unlock", systemImage: "lock.open.fill") }
                 .tag(0)
 
-            AnchorView()
-                .tabItem { Label("Anchor", systemImage: "location.north.line") }
+            EnrollView()
+                .tabItem { Label("Setup", systemImage: "wand.and.stars") }
                 .tag(1)
 
-            VaultView()
-                .tabItem { Label("Vault", systemImage: "lock.shield") }
-                .tag(2)
-
             AuthenticatorView(incomingChallenge: $router.incomingChallenge)
-                .tabItem { Label("Authenticator", systemImage: "person.badge.key") }
-                .tag(3)
-
-            SetupView()
-                .tabItem { Label("Setup", systemImage: "wand.and.stars") }
-                .tag(4)
+                .tabItem { Label("Auth", systemImage: "person.badge.key") }
+                .tag(2)
         }
         .tint(.cyan)
         .onChange(of: router.incomingChallenge) { _, challenge in
-            if challenge != nil { selectedTab = 3 }
+            if challenge != nil { selectedTab = 2 }
         }
     }
 }
 
 #Preview {
-    HomeView()
-        .environmentObject(AppRouter.shared)
+    HomeView().environmentObject(AppRouter.shared)
 }

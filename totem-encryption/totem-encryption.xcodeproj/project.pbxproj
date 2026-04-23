@@ -11,10 +11,10 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		B2CB40EC2F96EA28001DB3C3 = {
+		B2CB40EC2F96EA28001DB3C3 /* Exceptions for "totem-encryption" folder in "totem-encryption" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"Info.plist",
+				Info.plist,
 			);
 			target = B2CB40E82F96EA28001DB3C3 /* totem-encryption */;
 		};
@@ -24,7 +24,7 @@
 		B2CB40EB2F96EA28001DB3C3 /* totem-encryption */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				B2CB40EC2F96EA28001DB3C3,
+				B2CB40EC2F96EA28001DB3C3 /* Exceptions for "totem-encryption" folder in "totem-encryption" target */,
 			);
 			path = "totem-encryption";
 			sourceTree = "<group>";
