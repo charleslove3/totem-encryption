@@ -1,4 +1,4 @@
-  //
+//
 //  UnlockView.swift
 //  totem-encryption
 //
@@ -218,9 +218,10 @@ struct UnlockView: View {
             }
             .buttonStyle(.borderedProminent).tint(.cyan)
 
-            Button { reset() }
-                .foregroundStyle(.secondary).font(.caption)
-            { Text("Cancel") }
+            Button { reset() } label: {
+                Text("Cancel")
+            }
+            .foregroundStyle(.secondary).font(.caption)
         }
     }
 
