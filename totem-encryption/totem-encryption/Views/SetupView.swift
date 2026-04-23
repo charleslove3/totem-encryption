@@ -247,7 +247,7 @@ struct SetupView: View {
         do {
             let seed = FuzzyExtractor.buildSeed(cloud: cloud)
             let (key, helperString) = try FuzzyExtractor.enroll(seedData: seed)
-            try await vault.storeHelperString(helperString)
+            try await vault.storeHelper(helperString, for: .carry)
             ciphertext = try vault.encrypt(plaintext: Data(secret.utf8), key: key)
             UserDefaults.standard.set(ciphertext, forKey: "totem_ciphertext")
         } catch {

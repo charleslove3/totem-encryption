@@ -80,30 +80,25 @@ final class AuthenticatorService: ObservableObject {
         }
 
         statusMessage = "Reconstructing key…"
-        do {
-            // Try every enrolled slot until one produces a valid signature
-            let seed = FuzzyExtractor.buildSeed(cloud: cloud)
-            var signed = false
-            for slot in TotemSlot.allCases where vault.isEnrolled(slot) {
-                guard let helper = try? vault.loadHelperNoAuth(for: slot),
-                      let key = try? FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helper)
-                else { continue }
-                let signature = signNonce(session.nonce, with: key)
-                session.status = .approved
-                session.signedResponse = signature
-                update(session: session)
-                statusMessage = "Approved ✓ — \(session.origin) (via \(slot.displayName))"
-                signed = true
-                break
-            }
-            if !signed {
-                update(challengeID: challengeID, status: .denied)
-                statusMessage = "Denied ✗ — no matching object"
-            }
 
-        } catch {
+        // Try every enrolled slot until one produces a valid signature
+        let seed = FuzzyExtractor.buildSeed(cloud: cloud)
+        var signed = false
+        for slot in TotemSlot.allCases where vault.isEnrolled(slot) {
+            guard let helper = try? vault.loadHelperNoAuth(for: slot),
+                  let key = try? FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helper)
+            else { continue }
+            let signature = signNonce(session.nonce, with: key)
+            session.status = .approved
+            session.signedResponse = signature
+            update(session: session)
+            statusMessage = "Approved ✓ — \(session.origin) (via \(slot.displayName))"
+            signed = true
+            break
+        }
+        if !signed {
             update(challengeID: challengeID, status: .denied)
-            statusMessage = "Denied ✗ — \(error.localizedDescription)"
+            statusMessage = "Denied ✗ — no matching object"
         }
     }
 

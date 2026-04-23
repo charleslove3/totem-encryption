@@ -150,9 +150,12 @@ struct VaultView: View {
         isWorking = true
         statusMessage = "Enrolling…"
         do {
-            let (_, helperString) = try buildKeyMaterial()
-            try await vault.storeHelperString(helperString)
-            statusMessage = "Enrolled ✓ — helper string saved in Vault."
+            let cloud = lidar.capturedCloud ?? syntheticCloud()
+            let seed = FuzzyExtractor.buildSeed(cloud: cloud)
+            let (_, helperString) = try FuzzyExtractor.enroll(seedData: seed)
+            let slot = vault.enrolledSlots.first ?? .carry
+            try await vault.storeHelper(helperString, for: slot)
+            statusMessage = "Enrolled ✓ — saved to \(slot.displayName) slot."
         } catch {
             showErrorAlert(error)
         }
@@ -163,9 +166,10 @@ struct VaultView: View {
         isWorking = true
         statusMessage = "Encrypting…"
         do {
-            let (key, _) = try buildKeyMaterial()
-            let data = Data(plaintext.utf8)
-            ciphertext = try vault.encrypt(plaintext: data, key: key)
+            let cloud = lidar.capturedCloud ?? syntheticCloud()
+            let seed = FuzzyExtractor.buildSeed(cloud: cloud)
+            let (key, _) = try FuzzyExtractor.enroll(seedData: seed)
+            ciphertext = try vault.encrypt(plaintext: Data(plaintext.utf8), key: key)
             decrypted = nil
             statusMessage = "Encrypted ✓"
         } catch {
@@ -178,25 +182,21 @@ struct VaultView: View {
         guard let ct = ciphertext else { return }
         isWorking = true
         statusMessage = "Reconstructing key…"
-        do {
-            let seed = buildNoisySeed()
-            var decryptedData: Data?
-            for slot in TotemSlot.allCases where vault.isEnrolled(slot) {
-                guard let helper = try? vault.loadHelperNoAuth(for: slot),
-                      let key = try? FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helper),
-                      let data = try? vault.decrypt(ciphertext: ct, key: key)
-                else { continue }
-                decryptedData = data
-                break
-            }
-            if let data = decryptedData {
-                decrypted = String(data: data, encoding: .utf8) ?? "(binary data)"
-                statusMessage = "Decrypted ✓"
-            } else {
-                statusMessage = "Decryption failed — no matching object enrolled"
-            }
-        } catch {
-            showErrorAlert(error)
+        let seed = buildNoisySeed()
+        var decryptedData: Data?
+        for slot in TotemSlot.allCases where vault.isEnrolled(slot) {
+            guard let helper = try? vault.loadHelperNoAuth(for: slot),
+                  let key = try? FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helper),
+                  let data = try? vault.decrypt(ciphertext: ct, key: key)
+            else { continue }
+            decryptedData = data
+            break
+        }
+        if let data = decryptedData {
+            decrypted = String(data: data, encoding: .utf8) ?? "(binary data)"
+            statusMessage = "Decrypted ✓"
+        } else {
+            statusMessage = "Decryption failed — no matching object enrolled"
         }
         isWorking = false
     }
