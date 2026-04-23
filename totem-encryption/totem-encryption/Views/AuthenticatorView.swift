@@ -352,7 +352,7 @@ struct CountdownView: View {
                 .animation(.linear(duration: 1), value: secondsLeft)
             Text("\(secondsLeft)s")
                 .font(.system(.callout, design: .monospaced))
-                .foregroundStyle(secondsLeft > 10 ? .primary : .red)
+                .foregroundColor(secondsLeft > 10 ? .primary : .red)
         }
         .onReceive(timer) { _ in secondsLeft = max(0, Int(expiresAt.timeIntervalSinceNow)) }
         .onAppear      { secondsLeft = max(0, Int(expiresAt.timeIntervalSinceNow)) }
@@ -463,10 +463,12 @@ final class QRScannerViewController: UIViewController, AVCaptureMetadataOutputOb
                         didOutput metadataObjects: [AVMetadataObject],
                         from connection: AVCaptureConnection) {
         guard let obj = metadataObjects.first as? AVMetadataMachineReadableCodeObject,
-              let str = obj.stringValue, let url = URL(string: str) else { return }
+              let str = obj.stringValue,
+              let url = URL(string: str),
+              let onScan else { return }
         captureSession?.stopRunning()
         UINotificationFeedbackGenerator().notificationOccurred(.success)
-        dismiss(animated: true) { self.onScan(url) }
+        dismiss(animated: true) { onScan(url) }
     }
 }
 

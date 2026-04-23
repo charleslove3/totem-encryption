@@ -22,7 +22,7 @@ final class MagneticService: ObservableObject {
     @Published var statusMessage = "Ready"
 
     // MARK: - Private
-    private let motionManager = CMMagnetometerManager()
+    private let motionManager = CMMotionManager()
     private let queue = OperationQueue()
     private let tolerance: Double = 0.05   // 5 %
 
@@ -35,7 +35,7 @@ final class MagneticService: ObservableObject {
     // MARK: - Public API
 
     func start() {
-        guard CMMagnetometerManager.isAvailable() else {
+        guard motionManager.isMagnetometerAvailable else {
             statusMessage = "Magnetometer not available."
             return
         }
@@ -81,9 +81,4 @@ final class MagneticService: ObservableObject {
             isMatch = sig.matches(base, tolerance: tolerance)
         }
     }
-}
-
-// MARK: - CMMagnetometerManager availability shim
-private extension CMMagnetometerManager {
-    static func isAvailable() -> Bool { CMMagnetometerManager().isMagnetometerAvailable }
 }
