@@ -63,7 +63,7 @@ final class MagneticService: ObservableObject {
         if let encoded = try? JSONEncoder().encode(sig) {
             UserDefaults.standard.set(encoded, forKey: "magnetic_baseline")
         }
-        statusMessage = "Baseline saved (|\B| = \(String(format: "%.2f", sig.magnitude)) µT)."
+        statusMessage = "Baseline saved (|B| = \(String(format: "%.2f", sig.magnitude)) µT)."
     }
 
     func loadBaseline() {
