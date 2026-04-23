@@ -207,7 +207,8 @@ struct SetupView: View {
                 )
 
                 Text("Expires in \(ch.secondsRemaining > 0 ? "\(ch.secondsRemaining)s" : "—")")
-                    .font(.caption).foregroundStyle(ch.secondsRemaining > 10 ? .secondary : .red)
+                    .font(.caption)
+                    .foregroundColor(ch.secondsRemaining > 10 ? .secondary : .red)
                     .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
                         // Force refresh by toggling a throwaway state
                     }

@@ -74,7 +74,7 @@ final class AuthenticatorService: ObservableObject {
             return
         }
         guard let cloud else {
-            statusMessage = AuthenticatorError.noPhysicalData.localizedDescription ?? ""
+            statusMessage = AuthenticatorError.noPhysicalData.localizedDescription
             update(challengeID: challengeID, status: .denied)
             return
         }
