@@ -81,26 +81,25 @@ final class AuthenticatorService: ObservableObject {
 
         statusMessage = "Reconstructing key…"
         do {
-            // 1. Load helper string from Vault (biometric-gated).
-            let helperString = try await vault.loadHelperString()
-
-            // 2. Build seed from LiDAR only (magnetic anchor disabled for now).
+            // Try every enrolled slot until one produces a valid signature
             let seed = FuzzyExtractor.buildSeed(cloud: cloud)
-
-            // 3. Reconstruct deterministic key.
-            let key = try FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helperString)
-
-            // 4. Sign the nonce: HMAC-SHA256(nonce, key).
-            let signature = signNonce(session.nonce, with: key)
-
-            // 5. Mark approved and store the response.
-            session.status = .approved
-            session.signedResponse = signature
-            update(session: session)
-            statusMessage = "Approved ✓ — \(session.origin)"
-
-            // 6. In a real implementation: POST response to server.
-            // await submitResponse(ChallengeResponse(challengeID: challengeID, signature: signature, timestamp: Date()))
+            var signed = false
+            for slot in TotemSlot.allCases where vault.isEnrolled(slot) {
+                guard let helper = try? vault.loadHelperNoAuth(for: slot),
+                      let key = try? FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helper)
+                else { continue }
+                let signature = signNonce(session.nonce, with: key)
+                session.status = .approved
+                session.signedResponse = signature
+                update(session: session)
+                statusMessage = "Approved ✓ — \(session.origin) (via \(slot.displayName))"
+                signed = true
+                break
+            }
+            if !signed {
+                update(challengeID: challengeID, status: .denied)
+                statusMessage = "Denied ✗ — no matching object"
+            }
 
         } catch {
             update(challengeID: challengeID, status: .denied)

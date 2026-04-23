@@ -266,7 +266,6 @@ struct UnlockView: View {
 
             for slot in TotemSlot.allCases where vault.isEnrolled(slot) {
                 guard let helper = try? vault.loadHelperNoAuth(for: slot),
-                      let key = try? FuzzyExtractor.reconstruct(noisySeedData: seed, helperString: helper),
                       let ctB64 = ciphertexts[slot.rawValue],
                       let ctData = Data(base64Encoded: ctB64) else { continue }
 
